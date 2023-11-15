@@ -1,8 +1,16 @@
 .data
-    birthdays: .word 0:100    # matriz para armazenar os anivers·rios (100 registros)
-    count: .word 0            # contador de anivers·rios adicionados
-    menu: .asciiz "Menu:\n1. Adicionar anivers·rio\n2. Remover anivers·rio\n3. Visualizar anivers·rios\n4. Sair\nEscolha uma opÁ„o: "
+meses: .word 12
+nomes: .asciiz "Janeiro", "Fevereiro", "Mar√ßo", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+datas: .word 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 
+.text
+la $s0, nomes
+la $s1, datas
+li $t0, 0 # √≠ndice do vetor
+sll $t1, $t0, 2 # calcular o endere√ßo do elemento do vetor
+add $t2, $s0, $t1 # adicionar o endere√ßo do vetor ao endere√ßo do elemento do vetor
+lw $t3, 0($t2) # carregar o valor do elemento do vetor
+sw $t3, 0($t2) # armazenar o valor do elemento do vetor
 
 .text
 main:
@@ -12,22 +20,22 @@ main:
 
     li $v0, 5
     syscall
-    move $t0, $v0              # opÁ„o do menu
+    move $t0, $v0              # op√ß√£o do menu
 
-    beq $t0, 1, add_birthday    # se a opÁ„o for 1, adicionar anivers·rio
-    beq $t0, 2, remove_birthday # se a opÁ„o for 2, remover anivers·rio
-    beq $t0, 3, view_birthdays  # se a opÁ„o for 3, visualizar anivers·rios
-    beq $t0, 4, exit_program    # se a opÁ„o for 4, sair do programa
+    beq $t0, 1, add_birthday    # se a op√ß√£o for 1, adicionar anivers√°rio
+    beq $t0, 2, remove_birthday # se a op√ß√£o for 2, remover anivers√°rio
+    beq $t0, 3, view_birthdays  # se a op√ß√£o for 3, visualizar anivers√°rios
+    beq $t0, 4, exit_program    # se a op√ß√£o for 4, sair do programa
 
 add_birthday:
-    # cÛdigo para adicionar um anivers·rio ‡ agenda
+    # c√≥digo para adicionar um anivers√°rio √† agenda
 
 
 remove_birthday:
-    # cÛdigo para remover um anivers·rio da agenda
+    # c√≥digo para remover um anivers√°rio da agenda
 
 view_birthdays:
-    # cÛdigo para visualizar os anivers·rios na agenda
+    # c√≥digo para visualizar os anivers√°rios na agenda
 
 exit_program:
     li $v0, 10
