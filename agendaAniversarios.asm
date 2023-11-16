@@ -5,15 +5,16 @@
     menu: .asciiz "Menu:\n1. Adicionar aniversário\n2. Remover aniversário\n3. Visualizar aniversários\n4. Sair\nEscolha uma opção: "
     add_prompt: .asciiz "Insira o dia, mês e nome (com limite de 11 caracteres):\n"
     newline: .asciiz "\n"
-   month_prompt: .asciiz "Digite o número do mês desejado: "
-   found_birthday: .asciiz "Aniversário encontrado:\n"
-   month_invalid: .asciiz "Mês inválido. Operação cancelada.\n"
-   birthday_off: .asciiz "Mês inválido. Operação cancelada.\n"
-   month: .asciiz "Mês: "
-   day: .asciiz "Dia: "
-   nome: .asciiz "Aniversariante: "
-   
-   
+    month_prompt: .asciiz "Digite o número do mês desejado: "
+    day_prompt: .asciiz "Digite o número do dia desejado: "
+    name_prompt: .asciiz "Digite o nome desejado, deixe em branco para remover todos no dia e mês selecionados: "
+    found_birthday: .asciiz "Aniversário encontrado:\n"
+    month_invalid: .asciiz "Mês inválido. Operação cancelada.\n"
+    day_invalid: .asciiz "Dia inválido. Operação cancelada.\n"
+    birthday_off: .asciiz "Mês inválido. Operação cancelada.\n"
+    month: .asciiz "Mês: "
+    day: .asciiz "Dia: "
+    nome: .asciiz "Aniversariante: "
    
 .text
 main:
@@ -45,13 +46,22 @@ add_birthday:
     # Lê o dia
     li $v0, 5 # Seta a syscall para read int
     syscall
-    sw $v0, list($t1) # Salva no array
-    addi $t1, $t1, 4 # Seta o offset para o proximo campo (4 bytes a frente)
+    blt $v0, 1, invalid_day # Checa a validade do dia
+    bgt $v0, 31, invalid_day
+    move $t2, $v0 # Salva o dia em t2
+    
     # Lê o mês
     li $v0, 5 # Seta a syscall para read int
     syscall
+    blt $v0, 1, invalid_month # Checa a validade do mes
+    bgt $v0, 12, invalid_month
+    
+    sw $t2, list($t1) # Salva no array
+    addi $t1, $t1, 4 # Seta o offset para o proximo campo (4 bytes a frente)
     sw $v0, list($t1) # Salva no array
     addi $t1, $t1, 4 # Seta o offset para o proximo campo (4 bytes a frente)
+    
+    
     # Lê o nome
     li $v0, 8
     la $a0, name # salvará o input em name (necessário pois não é possível armazenar 10 bytes em um ponteiro
@@ -72,13 +82,14 @@ add_birthday:
     
     
     addi $t0, $t0, 1 # count++
-    sw $t0, count      # ^
+    sw $t0, count    # ^
     
     j main
 	
 #-----------------------------------------------------------------------------------------------------
 remove_birthday:
     # código para remover um aniversário da agenda
+    
     
     
     
@@ -173,6 +184,12 @@ no_birthdays_for_month:
 invalid_month:
     li $v0, 4
     la $a0, month_invalid
+    syscall
+    j main
+
+invalid_day:
+    li $v0, 4
+    la $a0, day_invalid
     syscall
     j main
 
