@@ -47,8 +47,19 @@ add_birthday:
     la $a0, name # salvará o input em name (necessário pois não é possível armazenar 10 bytes em um ponteiro
     li $a1, 12 # tamanho máximo do input de 11, (ultimo caractere precisa ser \0 por isso teremos apenas 9 caracteres pro nome) ***pode ser alterado
     syscall
-    lw $t3, name # carrega o nome em $t3
+    
+    move $t2, $zero # Offset para a variável name em t2
+    lw $t3, name($t2) # carrega o nome em $t3
     sw $t3, list($t1) # Salva no array
+    addi $t1, $t1, 4
+    addi $t2, $t2, 4
+    lw $t3, name($t2) # carrega o nome em $t3
+    sw $t3, list($t1) # Salva no array
+    addi $t1, $t1, 4
+    addi $t2, $t2, 4
+    lw $t3, name($t2) # carrega o nome em $t3
+    sw $t3, list($t1) # Salva no array
+    
     
     addi $t0, $t0, 1 # count++
     sw $t0, count      # ^
@@ -64,7 +75,8 @@ view_birthdays:
     lw $t0, count
     li $t1, 0 # seta o i = 0
     while:
-    	beq $t1, $t0, main
+    	beq $t1, $t0, main # while (i != count)
+    	
     	# calcular o offset
     	mul $t2, $t1, 20 # Calcula o offset em $t2 (índice * tamanho de cada espaço)
     	# Printa o dia
@@ -87,17 +99,29 @@ view_birthdays:
     	addi $t2, $t2, 4 # Seta o offset para o proximo campo (4 bytes a frente)
     	# Printa o nome
     	
-    	li $v0, 4
+    	lw $t3, list($t2) # Copia o nome do array para a variável name
+    	addi $t2, $t2, 4
+    	lw $t4, list($t2)
+    	addi $t2, $t2, 4
+    	lw $t5, list($t2)
+    	move $t6, $zero
+    	sw $t3, name($t6)
+    	addi $t6, $t6, 4
+    	sw $t4, name($t6)
+    	addi $t6, $t6, 4
+    	sw $t5, name($t6)
+    	
+    	li $v0, 4    # Seta o modo de syscall para printar string
     	la $a0, name # Seta o endereço da string em $a0
-    	lw $a1, list($t2) # Load the first word of the name
-        lw $a2, list + 4($t2)    # Load the second word of the name
-        lw $a3, list + 8($t2)   # Load the third word of the name
     	syscall
+    	
     	# printa nova linha
     	li $v0, 4
     	la $a0, newline
     	syscall
-    	addi $t1, $t1, 1
+    	
+    	
+    	addi $t1, $t1, 1 # i++
     	
     	j while
     
