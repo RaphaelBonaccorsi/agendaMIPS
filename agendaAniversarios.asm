@@ -89,8 +89,87 @@ add_birthday:
 #-----------------------------------------------------------------------------------------------------
 remove_birthday:
     # código para remover um aniversário da agenda
+    li $v0, 4
+    la $a0, day_prompt # printa a mensagem pedindo pelo input
+    syscall
+    # Lê o dia
+    li $v0, 5 # Seta a syscall para read int
+    syscall
+    blt $v0, 1, invalid_day # Checa a validade do dia
+    bgt $v0, 31, invalid_day
+    move $t0, $v0 # Salva o dia em t0
+    
+    li $v0, 4
+    la $a0, month_prompt # printa a mensagem pedindo pelo input
+    syscall
+    
+    # Lê o mês
+    li $v0, 5 # Seta a syscall para read int
+    syscall
+    blt $v0, 1, invalid_month # Checa a validade do mes
+    bgt $v0, 12, invalid_month
+    move $t1, $v0
+    # t0 = dia, t1 = mes
+    move $t2, $zero # Seta o offset em t2
+    move $t3, $zero # Seta i
     
     
+    removeWhile:
+         lw $t4, count # Carrega tamanho do vetor list
+         beq $t4, $t3, main # Se i = count sair do loop
+         lw $t6, list($t2) # Carrega o dia em t6
+         beq $t6, $t0, sameDayCondition # Se o dia for igual segue para sameDayCondition
+         
+         addi $t2, $t2, 20 # Seta o offset para o próximo dia
+         addi $t3, $t3, 1 # i++
+         j removeWhile # Se o dia não for igual retorna para começo no proximo espaço
+         
+    sameDayCondition:
+         addi $t2, $t2, 4 # Seta o offset para o mês
+         lw $t5, list($t2) # Carrega o mês em t5
+         move $t6, $t3   # t6 = t3 / j = i
+         beq $t5, $t1, removeEntry # Se o mês for igual, segue para removeEntry
+         addi $t2, $t2, 16 # Seta o offset para o próximo dia
+         addi $t3, $t3, 1 # i++
+         j removeWhile
+         
+    removeEntry:
+         # Loop para trazer todos os registros pra trás
+         beq $t6, $t4, removeCount # Se j = count, volte para removeCount (fim do vetor)
+         addi $t6, $t6, 1 # j++
+         mul $t8, $t6, 20 # Pega o offset para o próximo dia
+         ### Pega os proximos valores e coloca 20 bytes (um índice) antes
+         lw $t7, list($t8)
+         subi $t8, $t8, 20
+         sw $t7, list($t8)
+         addi $t8, $t8, 24
+         ###
+         lw $t7, list($t8)
+         subi $t8, $t8, 20
+         sw $t7, list($t8)
+         addi $t8, $t8, 24
+         ###
+         lw $t7, list($t8)
+         subi $t8, $t8, 20
+         sw $t7, list($t8)
+         addi $t8, $t8, 24
+         ###
+         lw $t7, list($t8)
+         subi $t8, $t8, 20
+         sw $t7, list($t8)
+         addi $t8, $t8, 24
+         ###
+         lw $t7, list($t8)
+         subi $t8, $t8, 20
+         sw $t7, list($t8)
+         addi $t8, $t8, 24
+         
+         j removeEntry
+         
+    removeCount:
+         subi $t4, $t4, 1
+         sw $t4, count
+         j removeWhile
     
     
 #-------------------------------------------------------------------------------------------------
