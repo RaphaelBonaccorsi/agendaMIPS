@@ -15,6 +15,7 @@
     month: .asciiz "Mês: "
     day: .asciiz "Dia: "
     nome: .asciiz "Aniversariante: "
+    full_prompt: .asciiz "Lista cheia!\n"
    
 .text
 main:
@@ -34,14 +35,15 @@ main:
 
 #----------------------------------------------------------------------------------------------
 add_birthday:
+    # Calcular o offset (id do array) para salvar os valores
+    lw $t0, count           # t0 = count
+    mul $t1, $t0, 20        # Offset em $t1
+    beq $t1, 2000, fullList # Se offset = limite, mostre mensagem de erro
+    
     # código para adicionar um aniversário à agenda
     li $v0, 4
     la $a0, add_prompt # printa a mensagem pedindo pelo input
     syscall
-    
-    # Calcular o offset (id do array) para salvar os valores
-    lw $t0, count
-    mul $t1, $t0, 20 # Offset em $t1
 
     # Lê o dia
     li $v0, 5 # Seta a syscall para read int
@@ -86,6 +88,11 @@ add_birthday:
     
     j main
 	
+fullList:
+    li $v0, 4
+    la $a0, full_prompt # printa a mensagem de erro lista cheia
+    syscall
+    j main
 #-----------------------------------------------------------------------------------------------------
 remove_birthday:
     # código para remover um aniversário da agenda
